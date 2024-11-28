@@ -6,6 +6,10 @@
 # Vartotojui atspėjus skaičių - pranešimas, koks buvo sugeneruotas skaičius ir kiek spėjimų buvo atlikta ir kiek buvo bandymų įvesti netinkamą skaičių.
 # Pabaigus žaidimą – siūloma sužaisti dar kartą.
 
+#Papildomos užduotys:
+# Žaidimo programavime panaudoti funkcijas
+# Be žaidimo paslaugos programa sukuria žaidimo „registravimo“ failą reg.txt, kuriame yra pateikiama informacija apie žaidimo eigą...
+
 from random import randint
 
 def registruotiSpejima(spejimoNr, spejimas, sugeneruotoSkirtumas, failas):
