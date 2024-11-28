@@ -32,7 +32,9 @@ def numerisEinantRatu(nenormalusIndeksas, sarasas):
 	return nenormalusIndeksas % len(sarasas)
 
 def traukimasAts(tmin, tmax, kiekLiko):
-	return min(kiekLiko, randint(tmin, tmax))
+	if(kiekLiko <= tmin):
+		return kiekLiko # nebėra pasirinkimo
+	return randint(tmin, min(kiekLiko,tmax))
 
 def traukimas(tmin, tmax, kiekLiko, paskutinisLaimi, zaidejuSk):
 	'''"dirbtinio intelekto" pseudo-strategiškas traukimas'''
@@ -94,39 +96,53 @@ while True:
 	elif len(zaidejai) > 0:
 		break
 
+kiekZaidimu = 0
 zaidziam = True
-while zaidziam:
-	print(f"Žaidžia {isvardinti(zaidejai)}.")
-	kiekLiko = taisykles.pradziojeMin
-	if(taisykles.pradziojeMin < taisykles.pradziojeMax):
-		kiekLiko = input("Kiek pradžioje lazdelių? (jei nepateiksit skaičiaus, aš sugalvosiu)...")
-		if(kiekLiko.isnumeric()):
-			kiekLiko = min(taisykles.pradziojeMax, max(taisykles.pradziojeMin, int(kiekLiko)))
-		else:
-			kiekLiko = randint(taisykles.pradziojeMin, taisykles.pradziojeMax)
-	
-	print(f"Pradėkime žaidimą!")
-	print(f"Yra {kiekLiko} {pritaikytiLinksni(kiekLiko, 'lazdelė','lazdelės','lazdelių')}.")
-	kienoEile = randint(0, len(zaidejai)-1) if taisykles.pradedaBetKuris else 0
-	while kiekLiko > 0:
-		traukiam = ''
-		if ('NPC' in zaidejai[kienoEile].upper()):
-			if('random' in zaidejai[kienoEile].lower()):
-				traukiam = traukimasAts(taisykles.kiekGalimaPaimtiMin, taisykles.kiekGalimaPaimtiMax, kiekLiko)
+failas = 'reg.txt'
+
+with open(failas, 'a+', encoding='utf8') as f:
+	print('--------------------------------', file=f)
+	while zaidziam:
+		print(f"Žaidžia {isvardinti(zaidejai)}.")
+		print(f"Žaidėjų vardai: {isvardinti(zaidejai)}.", file=f)
+		kiekLiko = taisykles.pradziojeMin
+		if(taisykles.pradziojeMin < taisykles.pradziojeMax):
+			kiekLiko = input("Kiek pradžioje lazdelių? (jei nepateiksit skaičiaus, aš sugalvosiu)...")
+			if(kiekLiko.isnumeric()):
+				kiekLiko = min(taisykles.pradziojeMax, max(taisykles.pradziojeMin, int(kiekLiko)))
 			else:
-				traukiam = traukimas(taisykles.kiekGalimaPaimtiMin, taisykles.kiekGalimaPaimtiMax, kiekLiko, taisykles.paskutinisLaimi, len(zaidejai))
-		else:
-			while not (traukiam.isnumeric() and taisykles.kiekGalimaPaimtiMin <= int(traukiam) <= min(kiekLiko, taisykles.kiekGalimaPaimtiMax)):
-				traukiam = input(f"Įveskite, kiek lazdelių nori paimti {zaidejai[kienoEile]} ({taisykles.kiekGalimaPaimtiMin}–{min(kiekLiko, taisykles.kiekGalimaPaimtiMax)}):...")
-			traukiam = int(traukiam)
-		kiekLiko -= traukiam
-		print(f"{zaidejai[kienoEile]} paėmė {traukiam} {pritaikytiLinksni(traukiam, 'lazdelę','lazdeles','lazdelių')}.", end=' ')
-		print(f"Liko {kiekLiko} {pritaikytiLinksni(kiekLiko, 'lazdelė','lazdelės','lazdelių')}.")
-		kienoEile = numerisEinantRatu(kienoEile+1, zaidejai)
-	# kadangi kienoEile pasikeičia ėjimo pabaigoje ciklo viduje, tai po paskutinio ciklo tenka tikrinti kieno eilė buvo prieš pasikeitimą;
-	# šito būtų galima išvengti keitimą darant ėjimo pradžioje, bet tada klaidinančiai atrodytų pradinis nustatymas kas pradeda žaidimą;
-	paskutinioVardas = zaidejai[numerisEinantRatu(kienoEile-1, zaidejai)]
-	print(f"{paskutinioVardas} paėmė paskutinę lazdelę!", end=' ')
-	print(f"{paskutinioVardas} {'laimėjo!' if (taisykles.paskutinisLaimi) else 'pralaimėjo!'}")
-	zaidziam = input("Ar norėtumėte žaisti dar kartą? (taip/ne)...").lower() in (['t', 'taip'])
-print("Viso gero.")
+				kiekLiko = randint(taisykles.pradziojeMin, taisykles.pradziojeMax)
+		
+		print(f"Pradėkime žaidimą!")
+		print(f"Yra {kiekLiko} {pritaikytiLinksni(kiekLiko, 'lazdelė','lazdelės','lazdelių')}.")
+		print(f"Lazdelių pasirinktas skaičius yra: {kiekLiko}.", file=f)
+		kienoEile = randint(0, len(zaidejai)-1) if taisykles.pradedaBetKuris else 0
+		print(f"Žaidimą pradeda {zaidejai[kienoEile]}.", file=f)
+		while kiekLiko > 0:
+			traukiam = ''
+			if ('NPC' in zaidejai[kienoEile].upper()):
+				if('random' in zaidejai[kienoEile].lower()):
+					traukiam = traukimasAts(taisykles.kiekGalimaPaimtiMin, taisykles.kiekGalimaPaimtiMax, kiekLiko)
+				else:
+					traukiam = traukimas(taisykles.kiekGalimaPaimtiMin, taisykles.kiekGalimaPaimtiMax, kiekLiko, taisykles.paskutinisLaimi, len(zaidejai))
+			else:
+				while not (traukiam.isnumeric() and taisykles.kiekGalimaPaimtiMin <= int(traukiam) <= min(kiekLiko, taisykles.kiekGalimaPaimtiMax)):
+					traukiam = input(f"Įveskite, kiek lazdelių nori paimti {zaidejai[kienoEile]} ({taisykles.kiekGalimaPaimtiMin}–{min(kiekLiko, taisykles.kiekGalimaPaimtiMax)}):...")
+				traukiam = int(traukiam)
+			kiekLiko -= traukiam
+			print(f"{zaidejai[kienoEile]} paėmė {traukiam} {pritaikytiLinksni(traukiam, 'lazdelę','lazdeles','lazdelių')}. Liko {kiekLiko}")
+			print(f"{zaidejai[kienoEile]} paima {traukiam} {pritaikytiLinksni(traukiam, 'lazdelę','lazdeles','lazdelių')}. Liko {kiekLiko}", file=f)
+			kienoEile = numerisEinantRatu(kienoEile+1, zaidejai)
+		kiekZaidimu += 1 #skaičiuojam tik sužaistus iki galo :)
+		# kadangi kienoEile pasikeičia ėjimo pabaigoje ciklo viduje, tai po paskutinio ciklo tenka tikrinti kieno eilė buvo prieš pasikeitimą;
+		# šito būtų galima išvengti keitimą darant ėjimo pradžioje, bet tada klaidinančiai atrodytų pradinis nustatymas kas pradeda žaidimą;
+		paskutinioVardas = zaidejai[numerisEinantRatu(kienoEile-1, zaidejai)]
+		print(f"{paskutinioVardas} paėmė paskutinę lazdelę!", end=' ')
+		print(f"{paskutinioVardas} {'laimėjo!' if (taisykles.paskutinisLaimi) else 'pralaimėjo!'}")
+		print(f"Žaidimą laimėjo {paskutinioVardas if taisykles.paskutinisLaimi else zaidejai[numerisEinantRatu(kienoEile-2, zaidejai)]}.", file=f)
+		zaidziam = input("Ar norėtumėte žaisti dar kartą? (taip/ne)...").lower() in (['t', 'taip'])
+		print(f"Į užklausą „Ar žaisite dar“ pasirinko „{'Taip' if zaidziam else 'Ne'}“", file=f)
+	print("Viso gero.")
+	print(f"Žaidimą žaidė {kiekZaidimu} {pritaikytiLinksni(kiekZaidimu, 'kartą', 'kartus', 'kartų')}", file=f)
+
+#GV: "žaidimas" sau: įrašyti žaidėjų vardus NPC-random ir NPC-smart ir stebėti iš kelinto karto laimi NPC-random prie taisykles.paskutinisLaimi
